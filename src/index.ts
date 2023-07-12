@@ -1,4 +1,6 @@
-import { Heir, Deceased, Calculator } from './core'
-import { Relation } from './assets'
+import relation from "./assets";
+import calculator from "./calculator";
+import deceased from "./deceased";
+import heir from "./heir";
 
-export { Heir, Deceased, Calculator, Relation }
+export {calculator, deceased, heir, relation};

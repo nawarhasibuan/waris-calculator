@@ -4,7 +4,6 @@
  * @email panawarhsb28@gmail.com
  */
 class Deceased {
-
   /**
    * name of deceased
    */
@@ -27,7 +26,7 @@ class Deceased {
    * @param estate number of inheritance
    * @default estate 100
    */
-  constructor({name, gender, estate=100}: cArgs){
+  constructor({name, gender, estate = 100}: deceasedArgs) {
     if (name) {
       this.name = name;
     }
@@ -40,14 +39,14 @@ class Deceased {
    * @returns name of Deceased
    */
   public toString(): string {
-    return this.name || ''
+    return this.name || "";
   }
 }
 
-type cArgs = {
-  name?: string,
-  gender: boolean,
-  estate?: number
-}
+export type deceasedArgs = {
+  name?: string;
+  gender: boolean;
+  estate?: number;
+};
 
-export default Deceased
+export default Deceased;
