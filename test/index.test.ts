@@ -1,22 +1,24 @@
 import Fraction from "fraction.js";
-import {calculator, deceased, heir, relation} from "../src";
-import {Calculator} from "../src/calculator";
-
-const Relation = relation();
+import calculator, {Calculator, deceased, heir} from "../src";
+import {HeirParams} from "../src/heir";
 
 type Data = {
   deceased: {gender: boolean};
-  heirs: {gender: boolean; relation: string; isPartner?: boolean}[];
+  heirs: {
+    gender: boolean;
+    relation: HeirParams["relation"];
+    isPartner?: boolean;
+  }[];
 };
 
 describe("normal case", () => {
   const _234: Data = {
     deceased: {gender: false},
     heirs: [
-      {isPartner: true, gender: true, relation: Relation.none},
-      {isPartner: false, gender: true, relation: Relation.siblingMother},
-      {isPartner: false, gender: false, relation: Relation.parent},
-      {isPartner: false, gender: true, relation: Relation.uncle},
+      {isPartner: true, gender: true, relation: "none"},
+      {isPartner: false, gender: true, relation: "sibling mother"},
+      {isPartner: false, gender: false, relation: "parent"},
+      {isPartner: false, gender: true, relation: "uncle"},
     ],
   };
 
@@ -46,13 +48,11 @@ describe("normal case", () => {
 
   it("should only: only wife", () => {
     const calc = calculator();
-    calc.push(heir({gender: false, isPartner: true, relation: Relation.other}));
+    calc.push(heir({gender: false, isPartner: true, relation: "other"}));
     calc.push(
-      heir({gender: false, isPartner: false, relation: Relation.siblingMother})
+      heir({gender: false, isPartner: false, relation: "sibling mother"})
     );
-    calc.push(
-      heir({gender: false, isPartner: false, relation: Relation.other})
-    );
+    calc.push(heir({gender: false, isPartner: false, relation: "other"}));
 
     expect(calc.radd).toBe(true);
     expect(calc.tashih).toBe(4);
@@ -69,13 +69,9 @@ describe("normal case", () => {
 describe("umaratain case", () => {
   it("case 1: husband", () => {
     const calc = calculator(deceased({gender: false}));
-    calc.push(heir({gender: true, relation: Relation.none, isPartner: true}));
-    calc.push(
-      heir({gender: true, relation: Relation.parent, isPartner: false})
-    );
-    calc.push(
-      heir({gender: false, relation: Relation.parent, isPartner: false})
-    );
+    calc.push(heir({gender: true, relation: "none", isPartner: true}));
+    calc.push(heir({gender: true, relation: "parent", isPartner: false}));
+    calc.push(heir({gender: false, relation: "parent", isPartner: false}));
 
     expect(calc.calculation).toEqual([
       new Fraction(1 / 2),
@@ -85,13 +81,9 @@ describe("umaratain case", () => {
   });
   it("case 2: wife", () => {
     const calc = calculator();
-    calc.push(heir({gender: false, relation: Relation.none, isPartner: true}));
-    calc.push(
-      heir({gender: true, relation: Relation.parent, isPartner: false})
-    );
-    calc.push(
-      heir({gender: false, relation: Relation.parent, isPartner: false})
-    );
+    calc.push(heir({gender: false, relation: "none", isPartner: true}));
+    calc.push(heir({gender: true, relation: "parent", isPartner: false}));
+    calc.push(heir({gender: false, relation: "parent", isPartner: false}));
 
     expect(calc.calculation).toEqual([
       new Fraction(1 / 4),
@@ -106,10 +98,10 @@ describe("siblings case", () => {
     const data: Data = {
       deceased: {gender: false},
       heirs: [
-        {gender: true, relation: Relation.none, isPartner: true}, //suami
-        {gender: false, relation: Relation.parent, isPartner: false}, //ibu
-        {gender: true, relation: Relation.grandParent, isPartner: false}, //kakek
-        {gender: false, relation: Relation.sibling, isPartner: false}, //saudari
+        {gender: true, relation: "none", isPartner: true}, //suami
+        {gender: false, relation: "parent", isPartner: false}, //ibu
+        {gender: true, relation: "grand parent", isPartner: false}, //kakek
+        {gender: false, relation: "sibling", isPartner: false}, //saudari
       ],
     };
     const calc = calculator(deceased(data.deceased));
@@ -151,9 +143,9 @@ describe("siblings case", () => {
     const _180: Data = {
       deceased: {gender: false},
       heirs: [
-        {gender: true, relation: Relation.none, isPartner: true},
-        {gender: true, relation: Relation.grandParent, isPartner: false},
-        {gender: true, relation: Relation.sibling, isPartner: false},
+        {gender: true, relation: "none", isPartner: true},
+        {gender: true, relation: "grand parent", isPartner: false},
+        {gender: true, relation: "sibling", isPartner: false},
       ],
     };
     const calc = calculator(deceased(_180.deceased));
@@ -177,12 +169,12 @@ describe("siblings case", () => {
     const data: Data = {
       deceased: {gender: true},
       heirs: [
-        {gender: false, relation: Relation.parent},
-        {gender: true, relation: Relation.grandParent},
-        {gender: true, relation: Relation.sibling},
-        {gender: true, relation: Relation.sibling},
-        {gender: false, relation: Relation.sibling},
-        {gender: false, relation: Relation.sibling},
+        {gender: false, relation: "parent"},
+        {gender: true, relation: "grand parent"},
+        {gender: true, relation: "sibling"},
+        {gender: true, relation: "sibling"},
+        {gender: false, relation: "sibling"},
+        {gender: false, relation: "sibling"},
       ],
     };
     const calc = add(data);
@@ -200,12 +192,12 @@ describe("siblings case", () => {
     const data: Data = {
       deceased: {gender: true},
       heirs: [
-        {gender: false, relation: Relation.child}, //daughtr
-        {gender: false, relation: Relation.grandParent}, //grandma
-        {gender: true, relation: Relation.grandParent}, //grandpa
-        {gender: false, relation: Relation.sibling}, //sister
-        {gender: false, relation: Relation.sibling},
-        {gender: false, relation: Relation.sibling},
+        {gender: false, relation: "child"}, //daughtr
+        {gender: false, relation: "grand parent"}, //grandma
+        {gender: true, relation: "grand parent"}, //grandpa
+        {gender: false, relation: "sibling"}, //sister
+        {gender: false, relation: "sibling"},
+        {gender: false, relation: "sibling"},
       ],
     };
     const calc = add(data);
@@ -229,17 +221,17 @@ describe("siblings case", () => {
     const data: Data = {
       deceased: {gender: false},
       heirs: [
-        {gender: true, relation: Relation.none, isPartner: true},
-        {gender: false, relation: Relation.child},
-        {gender: false, relation: Relation.child},
-        {gender: false, relation: Relation.child},
-        {gender: false, relation: Relation.child},
-        {gender: false, relation: Relation.child},
-        {gender: true, relation: Relation.grandParent},
-        {gender: true, relation: Relation.sibling},
-        {gender: true, relation: Relation.sibling},
-        {gender: true, relation: Relation.sibling},
-        {gender: true, relation: Relation.sibling},
+        {gender: true, relation: "none", isPartner: true},
+        {gender: false, relation: "child"},
+        {gender: false, relation: "child"},
+        {gender: false, relation: "child"},
+        {gender: false, relation: "child"},
+        {gender: false, relation: "child"},
+        {gender: true, relation: "grand parent"},
+        {gender: true, relation: "sibling"},
+        {gender: true, relation: "sibling"},
+        {gender: true, relation: "sibling"},
+        {gender: true, relation: "sibling"},
       ],
     };
     const calc = add(data);
@@ -263,15 +255,15 @@ describe("siblings case", () => {
     const data: Data = {
       deceased: {gender: true},
       heirs: [
-        {gender: false, relation: Relation.none, isPartner: true},
-        {gender: false, relation: Relation.none, isPartner: true},
-        {gender: false, relation: Relation.child},
-        {gender: false, relation: Relation.grandChild},
-        {gender: false, relation: Relation.parent},
-        {gender: true, relation: Relation.grandParent},
-        {gender: false, relation: Relation.sibling},
-        {gender: false, relation: Relation.sibling},
-        {gender: false, relation: Relation.sibling},
+        {gender: false, relation: "none", isPartner: true},
+        {gender: false, relation: "none", isPartner: true},
+        {gender: false, relation: "child"},
+        {gender: false, relation: "grand child"},
+        {gender: false, relation: "parent"},
+        {gender: true, relation: "grand parent"},
+        {gender: false, relation: "sibling"},
+        {gender: false, relation: "sibling"},
+        {gender: false, relation: "sibling"},
       ],
     };
     const calc = add(data);
@@ -293,15 +285,15 @@ describe("siblings case", () => {
     const data: Data = {
       deceased: {gender: false},
       heirs: [
-        {gender: true, relation: Relation.none, isPartner: true},
-        {gender: false, relation: Relation.child},
-        {gender: false, relation: Relation.child},
-        {gender: false, relation: Relation.child},
-        {gender: false, relation: Relation.child},
-        {gender: false, relation: Relation.parent},
-        {gender: true, relation: Relation.grandParent},
-        {gender: true, relation: Relation.sibling},
-        {gender: false, relation: Relation.sibling},
+        {gender: true, relation: "none", isPartner: true},
+        {gender: false, relation: "child"},
+        {gender: false, relation: "child"},
+        {gender: false, relation: "child"},
+        {gender: false, relation: "child"},
+        {gender: false, relation: "parent"},
+        {gender: true, relation: "grand parent"},
+        {gender: true, relation: "sibling"},
+        {gender: false, relation: "sibling"},
       ],
     };
     const calc = add(data);
@@ -323,9 +315,9 @@ describe("siblings case", () => {
     const data: Data = {
       deceased: {gender: true},
       heirs: [
-        {gender: true, relation: Relation.grandParent},
-        {gender: true, relation: Relation.sibling},
-        {gender: true, relation: Relation.siblingFather},
+        {gender: true, relation: "grand parent"},
+        {gender: true, relation: "sibling"},
+        {gender: true, relation: "sibling father"},
       ],
     };
     const calc = add(data);
@@ -342,11 +334,11 @@ describe("siblings case", () => {
     const _189: Data = {
       deceased: {gender: false},
       heirs: [
-        {gender: false, relation: Relation.sibling, isPartner: false}, //saudara pr
-        {gender: true, relation: Relation.grandParent, isPartner: false}, //kakek
-        {gender: true, relation: Relation.siblingFather, isPartner: false}, //sauarada seayah lk
-        {gender: false, relation: Relation.siblingFather, isPartner: false}, // "" pr
-        {gender: false, relation: Relation.siblingFather, isPartner: false}, //""""
+        {gender: false, relation: "sibling", isPartner: false}, //saudara pr
+        {gender: true, relation: "grand parent", isPartner: false}, //kakek
+        {gender: true, relation: "sibling father", isPartner: false}, //sauarada seayah lk
+        {gender: false, relation: "sibling father", isPartner: false}, // "" pr
+        {gender: false, relation: "sibling father", isPartner: false}, //""""
       ],
     };
     const calc = calculator(deceased(_189.deceased));
@@ -375,10 +367,10 @@ describe("siblings case", () => {
     const data: Data = {
       deceased: {gender: false},
       heirs: [
-        {gender: false, relation: Relation.parent},
-        {gender: true, relation: Relation.grandParent},
-        {gender: true, relation: Relation.sibling},
-        {gender: false, relation: Relation.siblingFather},
+        {gender: false, relation: "parent"},
+        {gender: true, relation: "grand parent"},
+        {gender: true, relation: "sibling"},
+        {gender: false, relation: "sibling father"},
       ],
     };
     const calc = add(data);
@@ -395,11 +387,11 @@ describe("siblings case", () => {
     const data: Data = {
       deceased: {gender: false},
       heirs: [
-        {gender: false, relation: Relation.parent},
-        {gender: true, relation: Relation.grandParent},
-        {gender: false, relation: Relation.sibling},
-        {gender: true, relation: Relation.siblingFather},
-        {gender: true, relation: Relation.siblingFather},
+        {gender: false, relation: "parent"},
+        {gender: true, relation: "grand parent"},
+        {gender: false, relation: "sibling"},
+        {gender: true, relation: "sibling father"},
+        {gender: true, relation: "sibling father"},
       ],
     };
     const calc = add(data);
@@ -418,10 +410,10 @@ describe("radd case", () => {
     const _225: Data = {
       deceased: {gender: true},
       heirs: [
-        {gender: false, relation: Relation.none, isPartner: true},
-        {gender: false, relation: Relation.grandParent, isPartner: false},
-        {gender: false, relation: Relation.siblingMother, isPartner: false},
-        {gender: false, relation: Relation.siblingMother, isPartner: false},
+        {gender: false, relation: "none", isPartner: true},
+        {gender: false, relation: "grand parent", isPartner: false},
+        {gender: false, relation: "sibling mother", isPartner: false},
+        {gender: false, relation: "sibling mother", isPartner: false},
       ],
     };
     const calc = calculator(deceased(_225.deceased));
@@ -439,9 +431,9 @@ describe("radd case", () => {
     const data: Data = {
       deceased: {gender: false},
       heirs: [
-        {gender: true, relation: Relation.none, isPartner: true},
-        {gender: false, relation: Relation.child},
-        {gender: false, relation: Relation.child},
+        {gender: true, relation: "none", isPartner: true},
+        {gender: false, relation: "child"},
+        {gender: false, relation: "child"},
       ],
     };
     const calc = add(data);
@@ -455,8 +447,8 @@ describe("radd case", () => {
     const data: Data = {
       deceased: {gender: true},
       heirs: [
-        {gender: false, relation: Relation.child},
-        {gender: false, relation: Relation.grandChild},
+        {gender: false, relation: "child"},
+        {gender: false, relation: "grand child"},
       ],
     };
     const calc = calculator(deceased(data.deceased));
@@ -474,9 +466,9 @@ describe("radd case", () => {
     const data: Data = {
       deceased: {gender: true},
       heirs: [
-        {gender: false, relation: Relation.sibling},
-        {gender: false, relation: Relation.siblingMother},
-        {gender: false, relation: Relation.siblingFather},
+        {gender: false, relation: "sibling"},
+        {gender: false, relation: "sibling mother"},
+        {gender: false, relation: "sibling father"},
       ],
     };
     const calc = calculator(deceased(data.deceased));
@@ -494,10 +486,10 @@ describe("radd case", () => {
     const data: Data = {
       deceased: {gender: true},
       heirs: [
-        {gender: false, relation: Relation.sibling},
-        {gender: false, relation: Relation.sibling},
-        {gender: false, relation: Relation.sibling},
-        {gender: false, relation: Relation.sibling},
+        {gender: false, relation: "sibling"},
+        {gender: false, relation: "sibling"},
+        {gender: false, relation: "sibling"},
+        {gender: false, relation: "sibling"},
       ],
     };
     const calc = add(data);
@@ -515,10 +507,10 @@ describe("aul case", () => {
     const data: Data = {
       deceased: {gender: false},
       heirs: [
-        {gender: true, relation: Relation.parent},
-        {gender: false, relation: Relation.parent},
-        {gender: false, relation: Relation.child},
-        {gender: false, relation: Relation.grandChild},
+        {gender: true, relation: "parent"},
+        {gender: false, relation: "parent"},
+        {gender: false, relation: "child"},
+        {gender: false, relation: "grand child"},
       ],
     };
     const calc = add(data);
@@ -537,9 +529,9 @@ describe("aul case", () => {
     const data: Data = {
       deceased: {gender: false},
       heirs: [
-        {gender: true, relation: Relation.none, isPartner: true},
-        {gender: false, relation: Relation.sibling},
-        {gender: false, relation: Relation.siblingMother},
+        {gender: true, relation: "none", isPartner: true},
+        {gender: false, relation: "sibling"},
+        {gender: false, relation: "sibling mother"},
       ],
     };
     const calc = add(data);
@@ -554,10 +546,10 @@ describe("aul case", () => {
     const data: Data = {
       deceased: {gender: false},
       heirs: [
-        {gender: true, relation: Relation.none, isPartner: true},
-        {gender: false, relation: Relation.parent},
-        {gender: false, relation: Relation.sibling},
-        {gender: false, relation: Relation.siblingMother},
+        {gender: true, relation: "none", isPartner: true},
+        {gender: false, relation: "parent"},
+        {gender: false, relation: "sibling"},
+        {gender: false, relation: "sibling mother"},
       ],
     };
     const calc = add(data);
@@ -573,11 +565,11 @@ describe("aul case", () => {
     const data: Data = {
       deceased: {gender: false},
       heirs: [
-        {gender: true, relation: Relation.none, isPartner: true},
-        {gender: true, relation: Relation.siblingMother},
-        {gender: true, relation: Relation.siblingMother},
-        {gender: false, relation: Relation.sibling},
-        {gender: false, relation: Relation.sibling},
+        {gender: true, relation: "none", isPartner: true},
+        {gender: true, relation: "sibling mother"},
+        {gender: true, relation: "sibling mother"},
+        {gender: false, relation: "sibling"},
+        {gender: false, relation: "sibling"},
       ],
     };
     const calc = add(data);
@@ -601,12 +593,12 @@ describe("aul case", () => {
     const data: Data = {
       deceased: {gender: false},
       heirs: [
-        {gender: true, relation: Relation.none, isPartner: true},
-        {gender: false, relation: Relation.siblingFather},
-        {gender: false, relation: Relation.siblingFather},
-        {gender: false, relation: Relation.siblingMother},
-        {gender: false, relation: Relation.siblingMother},
-        {gender: false, relation: Relation.parent},
+        {gender: true, relation: "none", isPartner: true},
+        {gender: false, relation: "sibling father"},
+        {gender: false, relation: "sibling father"},
+        {gender: false, relation: "sibling mother"},
+        {gender: false, relation: "sibling mother"},
+        {gender: false, relation: "parent"},
       ],
     };
     const calc = add(data);
@@ -624,10 +616,10 @@ describe("aul case", () => {
     const data: Data = {
       deceased: {gender: true},
       heirs: [
-        {gender: false, relation: Relation.none, isPartner: true},
-        {gender: false, relation: Relation.sibling},
-        {gender: false, relation: Relation.sibling},
-        {gender: false, relation: Relation.parent},
+        {gender: false, relation: "none", isPartner: true},
+        {gender: false, relation: "sibling"},
+        {gender: false, relation: "sibling"},
+        {gender: false, relation: "parent"},
       ],
     };
     const calc = add(data);
@@ -643,11 +635,11 @@ describe("aul case", () => {
     const data: Data = {
       deceased: {gender: true},
       heirs: [
-        {gender: false, relation: Relation.none, isPartner: true},
-        {gender: false, relation: Relation.parent},
-        {gender: false, relation: Relation.sibling},
-        {gender: false, relation: Relation.siblingFather},
-        {gender: false, relation: Relation.siblingMother},
+        {gender: false, relation: "none", isPartner: true},
+        {gender: false, relation: "parent"},
+        {gender: false, relation: "sibling"},
+        {gender: false, relation: "sibling father"},
+        {gender: false, relation: "sibling mother"},
       ],
     };
     const calc = add(data);
@@ -664,23 +656,23 @@ describe("aul case", () => {
     const data: Data = {
       deceased: {gender: true},
       heirs: [
-        {gender: false, relation: Relation.none, isPartner: true},
-        {gender: false, relation: Relation.none, isPartner: true},
-        {gender: false, relation: Relation.none, isPartner: true},
-        {gender: false, relation: Relation.grandParent},
-        {gender: false, relation: Relation.grandParent},
-        {gender: false, relation: Relation.siblingFather},
-        {gender: false, relation: Relation.siblingFather},
-        {gender: false, relation: Relation.siblingFather},
-        {gender: false, relation: Relation.siblingFather},
-        {gender: false, relation: Relation.siblingFather},
-        {gender: false, relation: Relation.siblingFather},
-        {gender: false, relation: Relation.siblingFather},
-        {gender: false, relation: Relation.siblingFather},
-        {gender: false, relation: Relation.siblingMother},
-        {gender: false, relation: Relation.siblingMother},
-        {gender: false, relation: Relation.siblingMother},
-        {gender: false, relation: Relation.siblingMother},
+        {gender: false, relation: "none", isPartner: true},
+        {gender: false, relation: "none", isPartner: true},
+        {gender: false, relation: "none", isPartner: true},
+        {gender: false, relation: "grand parent"},
+        {gender: false, relation: "grand parent"},
+        {gender: false, relation: "sibling father"},
+        {gender: false, relation: "sibling father"},
+        {gender: false, relation: "sibling father"},
+        {gender: false, relation: "sibling father"},
+        {gender: false, relation: "sibling father"},
+        {gender: false, relation: "sibling father"},
+        {gender: false, relation: "sibling father"},
+        {gender: false, relation: "sibling father"},
+        {gender: false, relation: "sibling mother"},
+        {gender: false, relation: "sibling mother"},
+        {gender: false, relation: "sibling mother"},
+        {gender: false, relation: "sibling mother"},
       ],
     };
     const calc = add(data);
@@ -709,11 +701,11 @@ describe("aul case", () => {
     const _225: Data = {
       deceased: {gender: true},
       heirs: [
-        {gender: false, relation: Relation.none, isPartner: true},
-        {gender: true, relation: Relation.parent},
-        {gender: false, relation: Relation.parent},
-        {gender: false, relation: Relation.child},
-        {gender: false, relation: Relation.child},
+        {gender: false, relation: "none", isPartner: true},
+        {gender: true, relation: "parent"},
+        {gender: false, relation: "parent"},
+        {gender: false, relation: "child"},
+        {gender: false, relation: "child"},
       ],
     };
     const calc = calculator(deceased(_225.deceased));

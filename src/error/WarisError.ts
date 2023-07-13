@@ -39,6 +39,11 @@ export default class WarisError extends Error {
     this.name = "CalculatorError";
     return this;
   }
+  /**
+   * push error occurred
+   * @param error error occurred
+   * @returns this error
+   */
   push(error: any) {
     this.errors.push(error);
     return this;
