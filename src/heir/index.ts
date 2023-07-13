@@ -1,7 +1,7 @@
-import Heir, {heirArgs} from "./Heir";
+import Heir, {HeirParams} from "./Heir";
 
-export default function heir(args: heirArgs) {
+export default function heir(args: HeirParams) {
   return new Heir({...args});
 }
 
-export {heirArgs, Heir};
+export {HeirParams, Heir};

@@ -1,3 +1,5 @@
+import error from "../error";
+
 /**
  * Class to create Heir object
  * @author Panawar Hasibuan
@@ -17,7 +19,7 @@ class Heir {
   /**
    * relation with deceased
    */
-  private _relation: string;
+  private _relation: Enum["relation"];
 
   /**
    * is this heir is partner of the deceased
@@ -31,10 +33,12 @@ class Heir {
    * @param relation relation between Heir and Deceased
    * @param name name of Heir
    */
-  constructor({gender, isPartner, relation, name}: heirArgs) {
-    const code = this.codeRelation(relation);
+  constructor({gender, isPartner, relation, name}: HeirParams) {
+    const code = this.relationCode[relation];
     if (isPartner && code >= 0 && code < 32) {
-      throw new Error("mahram cant be a partner");
+      throw error("mahram cant be a partner")
+        .heirErr()
+        .push({relation: "not allowed to be a partner"});
     }
     if (name) {
       this.name = name;
@@ -48,10 +52,12 @@ class Heir {
    * relation setter
    * @throws Error
    */
-  public set relation(v: string) {
-    const code = this.codeRelation(v);
+  public set relation(v: Enum["relation"]) {
+    const code = this.relationCode[v];
     if (this.isPartner && code >= 0 && code < 32) {
-      throw new Error("mahram cant be a partner");
+      throw error("mahram cant be a partner")
+        .heirErr()
+        .push({relation: "not allowed to be apartner"});
     }
     this._relation = v;
   }
@@ -59,7 +65,7 @@ class Heir {
   /**
    * relation getter
    */
-  public get relation(): string {
+  public get relation(): Enum["relation"] {
     return this._relation;
   }
 
@@ -71,7 +77,9 @@ class Heir {
   public set isPartner(v: boolean) {
     if (this.isPartner !== v) {
       if (v && this.code >= 0 && this.code < 32) {
-        throw new Error("mahram cant be a partner");
+        throw error("mahram cant be a partner")
+          .heirErr()
+          .push({relation: "not allowed to be a partner"});
       }
     }
     this._isPartner = v;
@@ -88,7 +96,7 @@ class Heir {
    * code heir relation
    */
   public get code(): number {
-    const code = this.codeRelation(this.relation);
+    const code = this.relationCode[this.relation];
     return code > 22 && code < 40 && !this.gender ? 40 : code;
   }
 
@@ -115,63 +123,61 @@ class Heir {
   }
 
   /**
-   * code of relation
-   *
-   * @param relation relation of heir
-   * @returns code of the relation
+   * relation code for translate to heir's power and darajah
    */
-  private codeRelation(relation: string): number {
-    const family = [
-      ["child", "grand child", "great grand child"],
-      ["parent", "grand parent", "great grand parent"],
-      [
-        "sibling",
-        "sibling father",
-        "sibling mother",
-        "nephew",
-        "nephew father",
-      ],
-      ["uncle", "uncle father", "cousin"],
-      ["other", "liberator", "none"],
-    ];
-    let x: number = 42;
-    family.forEach((elmt, index) => {
-      x = elmt.indexOf(relation) > -1 ? index * 10 + elmt.indexOf(relation) : x;
-    });
-    return x;
-  }
+  private relationCode = {
+    parent: 10,
+    "grand parent": 11,
+    "great grand parent": 12,
+    child: 0,
+    "grand child": 1,
+    "great grand child": 2,
+    sibling: 20,
+    "sibling father": 21,
+    "sibling mother": 22,
+    nephew: 23,
+    "nephew father": 24,
+    uncle: 30,
+    "uncle father": 31,
+    cousin: 32,
+    partner: 40,
+    other: 40,
+    liberator: 41,
+    none: 42,
+  };
 }
-
-export type heirArgs = {
+/**
+ * Type of Heir parameters
+ */
+export interface HeirParams {
   name?: string;
   gender: boolean;
-  relation: string;
+  relation: Enum["relation"];
   isPartner?: boolean;
-};
-
-enum RelationList {
-  partner = "partner",
-  other = "other",
-  liberator = "liberator",
-  none = "none",
-
-  greatGrandFather = "great grand father",
-  grandFather = "grand father",
-  father = "father",
-
-  child = "child",
-  grandChild = "grand child",
-  greatGrandChild = "great grand child",
-
-  sibling = "sibling",
-  siblingFather = "sibling father",
-  siblingMother = "sibling mother",
-  nephew = "nephew",
-  nephewFather = "nephew-father",
-
-  uncle = "uncle",
-  uncleFather = "uncle-father",
-  cousin = "cousin",
+}
+/**
+ * list of valid relation accepted by calculator
+ */
+interface Enum {
+  relation:
+    | "parent"
+    | "grand parent"
+    | "great grand parent"
+    | "child"
+    | "grand child"
+    | "great grand child"
+    | "sibling"
+    | "sibling father"
+    | "sibling mother"
+    | "nephew"
+    | "nephew father"
+    | "uncle"
+    | "uncle father"
+    | "cousin"
+    | "partner"
+    | "other"
+    | "liberator"
+    | "none";
 }
 
 export default Heir;
